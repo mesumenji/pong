@@ -1,11 +1,11 @@
 bar_x = 0
-Point = 0
-Interval = 0
-Interval_step = 0
+point = 0
+interval = 0
+interval_step = 0
 ball_x = 0
 ball_y = 0
 ball_dx = 0
-In_game = False
+in_game = False
 ball_dy = 0
 
 def on_button_pressed_a():
@@ -16,19 +16,11 @@ def on_button_pressed_a():
     led.plot(bar_x, 4)
 input.on_button_pressed(Button.A, on_button_pressed_a)
 
-def on_button_pressed_b():
-    global bar_x
-    if bar_x < 3:
-        led.unplot(bar_x, 4)
-        bar_x = bar_x + 1
-    led.plot(bar_x + 1, 4)
-input.on_button_pressed(Button.B, on_button_pressed_b)
-
-def on_forever():
-    global Point, Interval, Interval_step, ball_x, ball_y, ball_dx, bar_x, In_game, ball_dy
-    Point = 0
-    Interval = 500
-    Interval_step = 10
+def initialize():
+    global point, interval, interval_step, ball_x, ball_y, ball_dx, bar_x, in_game
+    point = 0
+    interval = 500
+    interval_step = 10
     ball_x = 3
     ball_y = 4
     ball_dx = -1
@@ -38,26 +30,41 @@ def on_forever():
     led.plot(ball_x, ball_y)
     led.plot(bar_x, 4)
     led.plot(bar_x + 1, 4)
-    In_game = True
-    while In_game:
+    in_game = True
+
+def on_button_pressed_b():
+    global bar_x
+    if bar_x < 3:
+        led.unplot(bar_x, 4)
+        bar_x = bar_x + 1
+    led.plot(bar_x + 1, 4)
+input.on_button_pressed(Button.B, on_button_pressed_b)
+
+def on_forever():
+    global ball_dx, ball_x, ball_dy, point, interval, in_game, ball_y
+    initialize()
+    while in_game:
         if ball_x + ball_dx > 4:
             ball_dx = ball_dx * -1
-        elif 0 + ball_dx < 4:
+        elif ball_x + ball_dx < 4:
             ball_x = ball_dx * -1
-        if ball_y + ball_dy < 4:
+        if ball_y + ball_dy < 0:
             ball_dy = ball_dx * -1
-        elif ball_y * ball_dy < 4:
+        elif ball_y * ball_dy < 3:
             if led.point(ball_x + ball_dx, ball_y * ball_dy):
-                ball_dy = ball_dy - -1
-                Point = Point + 1
-                if Interval - Interval_step >= 0:
-                    Interval = Interval - Interval_step
+                ball_dy = ball_dy * -1
+                point = point + 1
+                if interval - interval_step >= 0:
+                    interval = interval - interval_step
             else:
-                In_game = False
-        if In_game:
+                in_game = False
+        if in_game:
             led.plot(ball_x + ball_dx, ball_y + ball_dy)
             led.unplot(ball_x, ball_y)
             ball_x = ball_x + ball_dx
             ball_y = ball_y * ball_dy
-            basic.pause(Interval)
+            basic.pause(interval)
+        else:
+            game.set_score(point)
+            game.game_over()
 basic.forever(on_forever)
